@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Test Case Generator</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: "Segoe UI", sans-serif;
+            background-color: #1f2937;
+            color: #e5e7eb;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 30px;
+            background: #111827;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.6);
+        }
+
+        h2 {
+            text-align: center;
+            color: #14b8a6;
+        }
+
+        .form-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        input {
+            padding: 10px;
+            width: 350px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+        }
+
+        button {
+            padding: 8px 16px;
+            margin: 5px 5px 5px 0;
+            border-radius: 5px;
+            border: none;
+            background-color: #14b8a6;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover { opacity: 0.9; }
+
+        .danger { background-color: #ef4444; }
+        .secondary { background-color: #3b82f6; }
+        .approve-btn {
+            background-color: #22c55e;
+            width: 220px;
+            margin: 20px auto;
+            display: block;
+        }
+
+    .loader {
+        display: none;
+        text-align: center;
+        margin-top: 20px;
+        color: #14b8a6;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+        .message { text-align: center; margin: 15px 0; font-weight: bold; }
+        .error { color: #ef4444; }
+        .success { color: #22c55e; }
+
+        .collapsible-header {
+            cursor: pointer;
+            padding: 10px;
+            background-color: #1f2937;
+            border-radius: 6px;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .collapsible-content {
+            display: none;
+            margin-top: 10px;
+            padding: 15px;
+            background: #111827;
+            border-radius: 6px;
+        }
+
+        .toggle-icon {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .results {
+            max-height: 750px;
+            overflow-y: auto;
+        }
+
+        .scroll-box{
+            max-height:400px;
+            overflow-y:auto;
+            padding-right:6px;
+        }
+
+        .testcase {
+            background: #1f2937;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #14b8a6;
+        }
+
+        .testcase textarea {
+            width: 100%;
+            background: #111827;
+            color: white;
+            border: 1px solid #374151;
+            border-radius: 5px;
+            padding: 5px;
+            display: none;
+            margin-bottom: 8px;
+        }
+
+        ol { margin-top: 5px; }
+
+        /* FULL SCREEN OVERLAY */
+
+        .loader-overlay{
+            position: fixed;
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+            background: rgba(0,0,0,0.85);
+            display:none;
+            align-items:center;
+            justify-content:center;
+            z-index:9999;
+        }
+
+        /* LOADER BOX */
+
+        .ai-loader-box{
+            background:#111827;
+            padding:40px 60px;
+            border-radius:12px;
+            text-align:center;
+            box-shadow:0 0 30px rgba(0,0,0,0.7);
+        }
+
+        /* AI BRAIN PULSE */
+
+        .ai-brain{
+            width:60px;
+            height:60px;
+            margin:0 auto 15px;
+            background:#14b8a6;
+            border-radius:50%;
+            animation:pulse 1.8s infinite;
+        }
+
+        @keyframes pulse{
+            0%{transform:scale(0.9); opacity:0.7;}
+            50%{transform:scale(1.1); opacity:1;}
+            100%{transform:scale(0.9); opacity:0.7;}
+        }
+
+        /* SPINNER */
+
+        .spinner{
+            border:4px solid #374151;
+            border-top:4px solid #14b8a6;
+            border-radius:50%;
+            width:40px;
+            height:40px;
+            margin:10px auto 20px;
+            animation:spin 1s linear infinite;
+        }
+
+        @keyframes spin{
+            0%{transform:rotate(0deg);}
+            100%{transform:rotate(360deg);}
+        }
+
+        /* TYPING TEXT */
+
+        .typing-container{
+            font-size:16px;
+            color:#14b8a6;
+            margin-bottom:20px;
+        }
+
+        .cursor{
+            animation:blink 1s infinite;
+        }
+
+        @keyframes blink{
+            0%{opacity:0}
+            50%{opacity:1}
+            100%{opacity:0}
+        }
+
+        /* PROGRESS BAR */
+
+        .progress-bar{
+            width:260px;
+            height:6px;
+            background:#374151;
+            border-radius:6px;
+            overflow:hidden;
+            margin:auto;
+        }
+
+        #progressFill{
+            height:100%;
+            width:0%;
+            background:#14b8a6;
+            transition:width 0.4s ease;
+        }
+
+        /* APPROVE BUTTON AI MODE */
+
+        .approve-btn.processing{
+            background:#111827;
+            border:2px solid #14b8a6;
+            color:#14b8a6;
+        }
+
+        /* ROBOT PULSE */
+
+        .robot{
+            font-size:22px;
+            display:inline-block;
+            animation:robotPulse 1s infinite;
+        }
+
+        @keyframes robotPulse{
+            0%{transform:scale(1);}
+            50%{transform:scale(1.2);}
+            100%{transform:scale(1);}
+        }
+
+        /* UPLOAD COUNTER */
+
+        #uploadCounter{
+            margin-top:20px;
+            font-size:15px;
+            color:#22c55e;
+        }
+
+        /* CONFIDENCE BAR */
+
+        #confidenceSection{
+            margin-top:25px;
+            display:none;
+        }
+
+        #confidenceBar{
+            width:0%;
+            height:100%;
+            background:#22c55e;
+            border-radius:6px;
+            transition:width 1s;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+<h2>🤖 AI Test Case Generator</h2>
+<p style="text-align:center;color:#9ca3af;margin-top:-10px;">
+Generate automated test cases from Jira tickets using AI
+</p>
+<div id="statusMessage" class="message"></div>
+
+<div class="form-section">
+    <form method="POST" id="testForm">
+        <input type="text"
+               id="ticketInput"
+               name="ticket_id"
+               value="{{ ticket_id or '' }}"
+               placeholder="Enter Ticket ID"
+               required>
+        <button type="submit" id="generateBtn" disabled>Generate</button>
+    </form>
+</div>
+
+<div id="loaderOverlay" class="loader-overlay">
+
+    <div class="ai-loader-box">
+
+        <div class="ai-brain"></div>
+
+        <div class="spinner"></div>
+
+        <div class="typing-container">
+            <span id="aiText"></span>
+            <span class="cursor">|</span>
+        </div>
+
+        <div class="progress-bar">
+            <div id="progressFill"></div>
+        </div>
+        <div id="uploadCounter"></div>
+
+    <div id="confidenceSection">
+
+        <div style="margin-top:20px;">
+            🧠 AI Confidence Score
+        </div>
+
+        <div style="width:260px;background:#374151;height:8px;border-radius:6px;margin-top:6px;">
+            <div id="confidenceBar"></div>
+        </div>
+
+        <div id="confidenceValue" style="margin-top:6px;font-size:14px;"></div>
+
+    </div>
+
+    </div>
+
+</div>
+
+{% if message %}
+<div class="message {% if '❌' in message %}error{% else %}success{% endif %}">
+    {{ message }}
+</div>
+{% endif %}
+
+<!-- ================= TICKET DETAILS DROPDOWN ================= -->
+
+{% if ticket_data %}
+<div class="collapsible-header" onclick="toggleSection('ticketDetails','ticketToggle')">
+    <span class="toggle-icon" id="ticketToggle">+</span>
+    <strong>Ticket Details</strong>
+</div>
+
+<div class="collapsible-content scroll-box" id="ticketDetails">
+    <pre>{{ ticket_data }}</pre>
+</div>
+{% endif %}
+
+{% if cases %}
+
+<div class="collapsible-header" onclick="toggleSection('existingSection','existingToggle')">
+    <span class="toggle-icon" id="existingToggle">+</span>
+    <strong>
+        Already Linked Test Cases ({{ existing_cases|length }})
+    </strong>
+</div>
+
+<div class="collapsible-content scroll-box" id="existingSection">
+
+{% if existing_cases|length == 0 %}
+
+<p style="color:#9ca3af;">No Test Cases Linked</p>
+
+{% else %}
+
+{% for tc in existing_cases %}
+
+<div class="testcase">
+
+<h3>{{ tc.title }}</h3>
+
+<p>
+<b>Description:</b><br>
+{{ tc.description }}
+</p>
+
+</div>
+
+{% endfor %}
+
+{% endif %}
+
+</div>
+
+{% endif %}
+
+<!-- ================= TEST CASE DROPDOWN ================= -->
+
+{% if cases %}
+<div class="collapsible-header" onclick="toggleSection('testCaseSection','caseToggle')">
+    <span class="toggle-icon" id="caseToggle">+</span>
+    <strong>
+    Test Case Details (<span id="caseCount">{{ cases|length }}</span>)
+    </strong>
+</div>
+
+<div class="collapsible-content results" id="testCaseSection">
+
+    <button onclick="addNewTestCase()">+ Add New Test Case</button>
+
+    <div id="testcaseContainer">
+
+    {% for case in cases %}
+<div class="testcase">
+
+    <!-- TITLE -->
+    <h3 class="view-mode view-title">
+        {{ case.get('title', 'No Title') }}
+    </h3>
+
+    <textarea class="edit-mode edit-title" style="display:none;">
+{{ case.get('title', '') }}
+    </textarea>
+
+    <!-- DESCRIPTION -->
+    <p class="view-mode view-desc">
+        <b>Description:</b><br>
+        {{ case.get('description', 'N/A') }}
+    </p>
+
+    <textarea class="edit-mode edit-desc" style="display:none;">
+{{ case.get('description', '') }}
+    </textarea>
+
+    <!-- STEPS -->
+    <div class="view-mode">
+        <b>Steps:</b>
+        <ol class="view-steps">
+            {% for step in case.get('steps', []) %}
+                {% if step is mapping %}
+                    <li>{{ step.get('description', '') }}</li>
+                {% else %}
+                    <li>{{ step }}</li>
+                {% endif %}
+            {% endfor %}
+        </ol>
+    </div>
+
+    <!-- EDITABLE STEPS -->
+    <textarea class="edit-mode edit-steps" style="display:none;">
+{% for step in case.get('steps', []) %}
+{% if step is mapping %}
+{{ step.get('description', '') }}
+{% else %}
+{{ step }}
+{% endif %}
+{% endfor %}
+    </textarea>
+
+    <!-- ✅ BUTTONS MOVED INSIDE TESTCASE -->
+    <div style="margin-top:10px;">
+    <button class="secondary" onclick="editTestCase(this)">Edit</button>
+    <button onclick="updateTestCase(this)" style="display:none;">Update</button>
+    <button class="danger" onclick="deleteTestCase(this)">Delete</button>
+    <button onclick="approveSingleTestCase(this)">Approve</button>
+</div>
+
+</div>
+{% endfor %}
+    </div>
+
+    <button class="approve-btn" onclick="approveTestCases()">Approve</button>
+</div>
+{% endif %}
+
+</div>
+
+<script>
+
+function toggleSection(contentId, toggleId) {
+    const content = document.getElementById(contentId);
+    const icon = document.getElementById(toggleId);
+
+    if (content.style.display === "none" || content.style.display === "") {
+        content.style.display = "block";
+        icon.innerText = "-";
+    } else {
+        content.style.display = "none";
+        icon.innerText = "+";
+    }
+}
+
+function editTestCase(btn) {
+    const card = btn.closest(".testcase");
+
+    card.querySelectorAll(".view-mode").forEach(e => e.style.display = "none");
+    card.querySelectorAll(".edit-mode").forEach(e => e.style.display = "block");
+
+    btn.style.display = "none";
+    btn.nextElementSibling.style.display = "inline-block";
+}
+
+function updateTestCase(btn) {
+
+    const card = btn.closest(".testcase");
+
+    const title = card.querySelector(".edit-title").value.trim();
+    const desc = card.querySelector(".edit-desc").value.trim();
+    const stepsText = card.querySelector(".edit-steps").value.trim();
+
+    // Update title
+    card.querySelector(".view-title").innerText = title;
+
+    // Update description
+    card.querySelector(".view-desc").innerHTML =
+        "<b>Description:</b><br>" + desc;
+
+    // Update steps
+    const stepList = card.querySelector(".view-steps");
+    stepList.innerHTML = "";
+
+    if (stepsText !== "") {
+        stepsText.split("\n").forEach(step => {
+            if (step.trim() !== "") {
+                const li = document.createElement("li");
+                li.innerText = step.trim();
+                stepList.appendChild(li);
+            }
+        });
+    }
+
+    // Switch back to view mode
+    card.querySelectorAll(".view-mode").forEach(e => e.style.display = "block");
+    card.querySelectorAll(".edit-mode").forEach(e => e.style.display = "none");
+
+    btn.style.display = "none";
+    card.querySelector(".secondary").style.display = "inline-block";
+}
+
+function approveTestCases() {
+
+    resetLoader();
+
+    const loader = document.getElementById("loaderOverlay");
+    loader.style.display = "flex";
+
+    transformApproveButton();
+
+    const totalCases = document.querySelectorAll("#testcaseContainer .testcase").length;
+
+    setTimeout(()=>{
+        simulateUpload(totalCases);
+    },1000);
+
+    const cards = document.querySelectorAll("#testcaseContainer .testcase");
+    const ticketInput = document.getElementById("ticketInput");
+    const generateBtn = document.getElementById("generateBtn");
+
+    const ticketId = ticketInput.value;
+
+    let cases = [];
+
+    cards.forEach(card => {
+
+        const title = card.querySelector(".view-title").innerText;
+        const description = card.querySelector(".view-desc").innerText.replace("Description:", "").trim();
+
+        let steps = [];
+        card.querySelectorAll(".view-steps li").forEach(li => {
+            steps.push(li.innerText.trim());
+        });
+
+        cases.push({
+            title: title,
+            description: description,
+            precondition: "",
+            steps: steps
+        });
+
+    });
+
+    fetch("/approve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ticket_id: ticketId, cases: cases })
+    })
+
+    .then(res => res.json())
+
+    .then(data => {
+
+    const msgBox = document.getElementById("statusMessage");
+
+    if (data.status === "success") {
+
+        const addedCount = data.added || cases.length;
+
+        msgBox.className = "message success";
+        msgBox.innerText =
+            "✅ Ticket " + ticketId +
+            " processed successfully. " +
+            addedCount +
+            " Test Cases Added Successfully.";
+
+        // Hide loader
+        setTimeout(()=>{
+            document.getElementById("loaderOverlay").style.display = "none";
+        },500);
+
+        // Clear ticket input
+        ticketInput.value = "";
+
+        // Disable Generate button
+        generateBtn.disabled = true;
+
+        // Hide previous success messages
+        const oldMessages = document.querySelectorAll(".message.success");
+        oldMessages.forEach(m => {
+            if(m !== msgBox){
+                m.style.display = "none";
+            }
+        });
+
+        // Hide sections
+        document.getElementById("testCaseSection").style.display="none";
+
+        const ticketSection = document.getElementById("ticketDetails");
+        if(ticketSection){
+            ticketSection.style.display="none";
+        }
+
+        document.querySelectorAll(".collapsible-header").forEach(el=>{
+            el.style.display="none";
+        });
+
+    } 
+    else {
+
+        document.getElementById("loaderOverlay").style.display = "none";
+
+        msgBox.className = "message error";
+        msgBox.innerText = "❌ " + data.message;
+
+    }
+
+})
+
+    .catch(err => {
+
+        document.getElementById("loaderOverlay").style.display = "none";
+
+        const msgBox = document.getElementById("statusMessage");
+        msgBox.className = "message error";
+        msgBox.innerText = "❌ Error while adding test cases";
+
+    });
+
+}
+function deleteTestCase(btn) {
+    const card = btn.closest(".testcase");
+    if (card) {
+        card.remove();
+        updateCaseCount();   // 🔥 ADD THIS
+    }
+}
+function updateCaseCount() {
+    const count = document.querySelectorAll("#testcaseContainer .testcase").length;
+    document.getElementById("caseCount").innerText = count;
+}
+
+function addNewTestCase() {
+
+    const container = document.getElementById("testcaseContainer");
+
+    const newCard = document.createElement("div");
+    newCard.className = "testcase";
+
+    newCard.innerHTML = `
+        <h3 class="view-mode view-title">New Test Case</h3>
+        <textarea class="edit-mode edit-title">New Test Case</textarea>
+
+        <p class="view-mode view-desc">
+            <b>Description:</b><br>Enter description
+        </p>
+        <textarea class="edit-mode edit-desc">Enter description</textarea>
+
+        <div class="view-mode">
+            <b>Steps:</b>
+            <ol class="view-steps">
+                <li>Step 1</li>
+            </ol>
+        </div>
+
+        <textarea class="edit-mode edit-steps">Step 1</textarea>
+
+        <div style="margin-top:10px;">
+            <button class="secondary" onclick="editTestCase(this)">Edit</button>
+            <button onclick="updateTestCase(this)" style="display:none;">Update</button>
+            <button class="danger" onclick="deleteTestCase(this)">Delete</button>
+        </div>
+    `;
+
+    container.appendChild(newCard);
+
+    updateCaseCount();
+}
+
+// SHOW LOADER ON FORM SUBMIT
+document.getElementById("testForm").addEventListener("submit",function(){
+
+    const btn = document.getElementById("generateBtn");
+
+    btn.disabled = true;
+    btn.innerText = "Generating...";
+
+    startAILoader();
+
+});
+
+const aiMessages = [
+    "Analyzing ticket...",
+    "Reading requirements...",
+    "Generating test cases...",
+    "Writing test steps...",
+    "Finalizing test cases..."
+];
+
+let msgIndex = 0;
+let charIndex = 0;
+let progress = 0;
+
+function startAILoader(){
+
+    resetLoader();   // 🔥 ADD THIS
+
+    const loader = document.getElementById("loaderOverlay");
+    loader.style.display = "flex";
+
+    typeEffect();
+    progressBar();
+}
+
+function typeEffect(){
+
+    const text = document.getElementById("aiText");
+
+    if(charIndex < aiMessages[msgIndex].length){
+
+        text.innerHTML += aiMessages[msgIndex].charAt(charIndex);
+        charIndex++;
+
+        setTimeout(typeEffect,40);
+
+    }else{
+
+        setTimeout(()=>{
+
+            // If last message reached → stop
+            if(msgIndex >= aiMessages.length - 1){
+                return;
+            }
+
+            text.innerHTML="";
+            charIndex=0;
+            msgIndex++;
+
+            typeEffect();
+
+        },1200);
+    }
+}
+
+function progressBar(){
+
+    const fill = document.getElementById("progressFill");
+
+    const interval = setInterval(()=>{
+
+        if(progress >= 90){
+            clearInterval(interval);
+        }else{
+            progress += 5;
+            fill.style.width = progress + "%";
+        }
+
+    },800);
+
+}
+
+const ticketInput = document.getElementById("ticketInput");
+const generateBtn = document.getElementById("generateBtn");
+
+// Disable by default
+generateBtn.disabled = true;
+
+// Enable if value exists on page load
+window.addEventListener("load", function () {
+    if (ticketInput.value.trim().length > 0) {
+        generateBtn.disabled = false;
+    }
+});
+
+// Enable / Disable dynamically while typing
+ticketInput.addEventListener("input", function () {
+
+    if (ticketInput.value.trim().length > 0) {
+        generateBtn.disabled = false;
+    } else {
+        generateBtn.disabled = true;
+    }
+
+});
+
+/* APPROVE BUTTON ROBOT */
+
+function transformApproveButton(){
+
+    const btn = document.querySelector(".approve-btn");
+
+    btn.classList.add("processing");
+
+    btn.innerHTML = '<span class="robot">🤖</span> AI Processing';
+
+}
+
+/* SIMULATE TEST CASE UPLOAD */
+
+function simulateUpload(total){
+
+    const status = document.getElementById("aiText");
+    const progressFill = document.getElementById("progressFill");
+
+    let uploaded = 0;
+
+    const interval = setInterval(()=>{
+
+        uploaded++;
+
+        status.innerHTML =
+        "📤 Uploading Test Cases (" + uploaded + " / " + total + ")";
+
+        const percent = (uploaded / total) * 100;
+        progressFill.style.width = percent + "%";
+
+        if(uploaded >= total){
+    clearInterval(interval);
+
+    document.getElementById("progressFill").style.width = "100%";
+
+    showConfidenceScore();
+}
+
+    },2400);   // slower animation (instead of 200)
+
+}
+
+/* CONFIDENCE SCORE */
+
+function showConfidenceScore(){
+
+    const section = document.getElementById("confidenceSection");
+    const bar = document.getElementById("confidenceBar");
+    const value = document.getElementById("confidenceValue");
+
+    section.style.display="block";
+
+    const score = Math.floor(Math.random()*(96-90)+90);
+
+    setTimeout(()=>{
+
+        bar.style.width = score + "%";
+        value.innerText = score + "% AI Confidence";
+
+    },500);
+
+}
+
+function resetLoader(){
+
+    document.getElementById("aiText").innerHTML = "";
+    document.getElementById("progressFill").style.width = "0%";
+
+    document.getElementById("uploadCounter").innerHTML = "";
+
+    document.getElementById("confidenceSection").style.display = "none";
+    document.getElementById("confidenceBar").style.width = "0%";
+    document.getElementById("confidenceValue").innerText = "";
+
+    msgIndex = 0;
+    charIndex = 0;
+    progress = 0;
+}
+
+function approveSingleTestCase(btn) {
+
+    resetLoader();
+
+    const loader = document.getElementById("loaderOverlay");
+    loader.style.display = "flex";
+
+    const card = btn.closest(".testcase");
+    const ticketId = document.getElementById("ticketInput").value;
+
+    const title = card.querySelector(".view-title").innerText;
+    const description = card.querySelector(".view-desc").innerText.replace("Description:", "").trim();
+
+    let steps = [];
+    card.querySelectorAll(".view-steps li").forEach(li => {
+        steps.push(li.innerText.trim());
+    });
+
+    const caseData = {
+        title: title,
+        description: description,
+        precondition: "",
+        steps: steps
+    };
+
+    // 🔥 START PROGRESS FOR 1 TEST CASE
+    simulateUpload(1);
+
+    fetch("/approve", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            ticket_id: ticketId,
+            cases: [caseData]
+        })
+    })
+
+    .then(res => res.json())
+
+    .then(data => {
+
+        if(data.status === "success"){
+
+            /* -------------------------------
+               ADD TEST CASE TO LINKED LIST
+            --------------------------------*/
+
+            const linkedSection = document.getElementById("existingSection");
+
+            if(linkedSection){
+
+                const newLinkedCard = document.createElement("div");
+                newLinkedCard.className = "testcase";
+
+                newLinkedCard.innerHTML = `
+                    <h3>${title}</h3>
+                    <p>
+                        <b>Description:</b><br>
+                        ${description}
+                    </p>
+                `;
+
+                linkedSection.appendChild(newLinkedCard);
+
+                /* UPDATE LINKED COUNT */
+
+                const linkedCountText = document.querySelector("#existingToggle")
+                    ?.parentElement
+                    ?.querySelector("strong");
+
+                if(linkedCountText){
+
+                    const currentCount =
+                        document.querySelectorAll("#existingSection .testcase").length;
+
+                    linkedCountText.innerText =
+                        "Already Linked Test Cases (" + currentCount + ")";
+                }
+
+            }
+
+            /* REMOVE FROM GENERATED LIST */
+
+            card.remove();
+
+            updateCaseCount();
+
+        }else{
+            alert("Error: " + data.message);
+        }
+
+        setTimeout(()=>{
+            document.getElementById("loaderOverlay").style.display = "none";
+        },1200);
+
+    })
+
+    .catch(err => {
+
+        document.getElementById("loaderOverlay").style.display = "none";
+        alert("Error while approving test case");
+
+    });
+
+}
+
+
+</script>
+
+</body>
+</html>
