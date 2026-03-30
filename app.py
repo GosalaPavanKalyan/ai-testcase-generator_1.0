@@ -3,6 +3,7 @@ import requests
 import json
 from google import genai
 from google.genai import types
+import os
 
 app = Flask(__name__)
 
@@ -11,9 +12,11 @@ app = Flask(__name__)
 # =============================
 PROJECT_ID = 10000
 
-JIRA_AUTH = "Basic Z29zYWxhcGF2YW5rYWx5YW5AZ21haWwuY29tOkFUQVRUM3hGZkdGMFliLTdkaTg3ajZOSjhBLWdKS3FxbU0xXzNVNldRVW9HSHhsNEtMUVpSRXRzX2pjWVVMNFFqYkJIbzBSdVVfbUlrSVBHZ1hHUmRGd29iZV9CenNTV3c0dENROXpNQVhUbTJ4NkJWcmVsQXBqSzlBWHhBVTJGSW9LUmdOS2JULTJsc2RxVDZXZVpvWVE3QS1CdUlxTTlpeUtQaGRSYlFYRVJ5TjkwMnRySmxjWT03MkJGMUI5MA=="
-AIO_AUTH = "AioAuth MzRlYmY2ZGUtNDMxNC0zZmJkLWFmYmItM2I4YWQ4Y2VlMGNhLjI2NTU1NjY1LWI4Y2ItNDkxNi05YTZmLWU0OWY5NjczNzFkYg=="
-GEMINI_API_KEY = "AIzaSyCnbdNnDMSqusiCGIgz7JEvYLOfGTS0glI"
+
+
+JIRA_AUTH = os.getenv("JIRA_AUTH")
+AIO_AUTH = os.getenv("AIO_AUTH")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 STATUS_PUBLISHED = 3
 
