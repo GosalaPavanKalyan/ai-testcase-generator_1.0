@@ -119,7 +119,7 @@ def generate_test_cases(ticketdata, existing_cases):
     SYSTEM_PROMPT = """
 You are a Senior QA Automation Engineer.
 
-Generate Positive, Negative, and Boundary test cases using data provided in <context> and skip the test cases that are already present in <existing_test_cases>.
+Generate Positive, Negative, and Boundary test cases using data provided in <context> and skip the test cases that are already present in <existing_test_cases> and Generate MAX 5 test cases only.
 
 <context>
 {context}
