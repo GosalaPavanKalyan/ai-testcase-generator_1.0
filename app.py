@@ -145,7 +145,7 @@ Each test case must contain:
     )
 
     response = client.models.generate_content(
-        model="gemini-2.0-flash,
+        model="gemini-2.0-flash",
         contents=formatted_prompt,
         config=types.GenerateContentConfig(
             temperature=0,
